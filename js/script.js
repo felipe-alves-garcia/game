@@ -15,6 +15,7 @@ canvas.height = height;
 //Controll Player 1
 
 window.addEventListener("keydown", (event) => {
+    let direcao;
     switch (event.key){
         case 'a':
             p1.keys.a.pressed = true;
@@ -33,6 +34,50 @@ window.addEventListener("keydown", (event) => {
             if(!p1.puloEstado)
                 p1.puloEstado = true;
         break;
+        case "b":
+            p1.keys.b.pressed = true;
+            p1.lastKey = "b";
+            if (!p1.ataqueAtivoBaixo){
+                direcao = "left";
+                if (p1.dx - p2.dx <= 0)
+                    direcao = "right"
+                p1.ataque[p1.numAtaque] = ataque(
+                    p1.dx,
+                    p1.dy,
+                    p1.dw,
+                    p1.dh,
+                    direcao,
+                    "baixo",
+                )
+                p1.numAtaque++;  
+                p1.ataqueAtivoBaixo = true;
+                ataqueTime = setTimeout(() => {
+                    p1.ataqueAtivoBaixo = false;
+                }, 1000)
+            }
+        break;
+        case "v":
+            p1.keys.b.pressed = true;
+            p1.lastKey = "b";
+            if (!p1.ataqueAtivoAlto){
+                direcao = "left";
+                if (p1.dx - p2.dx <= 0)
+                    direcao = "right"
+                p1.ataque[p1.numAtaque] = ataque(
+                    p1.dx,
+                    p1.dy,
+                    p1.dw,
+                    p1.dh,
+                    direcao,
+                    "alto",
+                )
+                p1.numAtaque++;  
+                p1.ataqueAtivoAlto = true;
+                ataqueTime = setTimeout(() => {
+                    p1.ataqueAtivoAlto = false;
+                }, 1000)
+            }
+        break;
     }
 });
 
@@ -47,12 +92,19 @@ window.addEventListener("keyup", (event) => {
         case 'w':
             p1.keys.w.pressed = false
         break;
+        case 'b':
+            p1.keys.b.pressed = false
+        break;
+        case 'v':
+            p1.keys.v.pressed = false
+        break;
     }
 });
 
 //Controll Player 2
 
 window.addEventListener("keydown", (event) => {
+    let direcao;
     switch (event.key){
         case 'ArrowLeft':
             p2.keys.a.pressed = true;
@@ -71,6 +123,50 @@ window.addEventListener("keydown", (event) => {
             if(!p2.puloEstado)
                 p2.puloEstado = true;
         break;
+        case "p":
+            p2.keys.p.pressed = true;
+            p2.lastKey = "p";
+            if (!p2.ataqueAtivoBaixo){
+                direcao = "left";
+                if (p2.dx - p1.dx <= 0)
+                    direcao = "right"
+                p2.ataque[p2.numAtaque] = ataque(
+                    p2.dx,
+                    p2.dy,
+                    p2.dw,
+                    p2.dh,
+                    direcao,
+                    "baixo",
+                )
+                p2.numAtaque++;  
+                p2.ataqueAtivoBaixo = true;
+                ataqueTime = setTimeout(() => {
+                    p2.ataqueAtivoBaixo = false;
+                }, 1000)
+            }
+        break;
+        case "o":
+            p2.keys.o.pressed = true;
+            p2.lastKey = "o";
+            if (!p2.ataqueAtivoAlto){
+                direcao = "left";
+                if (p2.dx - p1.dx <= 0)
+                    direcao = "right"
+                p2.ataque[p2.numAtaque] = ataque(
+                    p2.dx,
+                    p2.dy,
+                    p2.dw,
+                    p2.dh,
+                    direcao,
+                    "alto",
+                )
+                p2.numAtaque++;  
+                p2.ataqueAtivoAlto = true;
+                ataqueTime = setTimeout(() => {
+                    p2.ataqueAtivoAlto = false;
+                }, 1000)
+            }
+        break;
     }
 });
 
@@ -84,6 +180,12 @@ window.addEventListener("keyup", (event) => {
         break;
         case 'ArrowUp':
             p2.keys.w.pressed = false
+        break;
+        case 'p':
+            p2.keys.p.pressed = false;
+        break;
+        case 'o':
+            p2.keys.o.pressed = false
         break;
     }
 });
@@ -119,10 +221,18 @@ let p1 = {
     dy:100,
     dw:64,
     dh:128,
+    ataque:[
+
+    ],
+    ataqueAtivoAlto:false,
+    ataqueAtivoBaixo:false,
+    numAtaque:0,
     keys: {
         a:{pressed:false},
         d:{pressed:false},
         w:{pressed:false},
+        b:{pressed:false},
+        v:{pressed:false}
     },
     lastKey:"",
     eixoX:0,
@@ -166,6 +276,19 @@ let p1 = {
         else if(p1.eixoX < 0){
             p1.dx += (floor.dx + floor.dw - p1.dx + 1);
         }
+
+        //Ataque
+        if (p1.numAtaque > 0){
+            p1.ataque.forEach((at) => {
+                if(at.ativo){
+                    at.dx += at.eixoX * fps;
+
+                    at.eixoY = gravidade(at.eixoY, fps, at.dx, at.dy, at.dw, at.dh, p1.element);
+                    at.dy += at.eixoY * fps;
+                }
+                print(at.dx, at.dy, at.dw, at.dh, at.style)
+            })
+        }
     }, 
 }
 
@@ -181,10 +304,18 @@ let p2 = {
     dy:100,
     dw:64,
     dh:128,
+    ataque:[
+
+    ],
+    ataqueAtivoAlto:false,
+    ataqueAtivoBaixo:false,
+    numAtaque:0,
     keys: {
         a:{pressed:false},
         d:{pressed:false},
         w:{pressed:false},
+        p:{pressed:false},
+        o:{pressed:false},
     },
     lastKey:"",
     eixoX:0,
@@ -226,6 +357,19 @@ let p2 = {
         }
         else if(p2.eixoX < 0){
             p2.dx += (floor.dx + floor.dw - p2.dx + 1);
+        }
+
+        //Ataque
+        if (p2.numAtaque > 0){
+            p2.ataque.forEach((at) => {
+                if(at.ativo){
+                    at.dx += at.eixoX * fps;
+
+                    at.eixoY = gravidade(at.eixoY, fps, at.dx, at.dy, at.dw, at.dh, p1.element);
+                    at.dy += at.eixoY * fps;
+                }
+                print(at.dx, at.dy, at.dw, at.dh, at.style)
+            })
         }
     }, 
 }
@@ -307,7 +451,6 @@ function colisao (x, y, w, h, element){
                 y+h >= item.y &&
                 y <= item.y+item.h
             ){
-                console.log(item.element)
                 colisaoEstado = true;
             }
         }
@@ -315,7 +458,41 @@ function colisao (x, y, w, h, element){
     return colisaoEstado;
 }
 
+function ataque (x, y, w, h, direcao, tipo){
+    let ataque = {
+        dx:x+w,
+        dy:y+(h/4),
+        dw:16,
+        dh:16,
+        tipo:tipo,
+        direcao:direcao,
+        ativo:true,
+        eixoX:0,
+        eixoY:0,
+        style:"rgb(255, 255, 0)"
+    }
+    if(ataque.tipo == "alto"){
+        ataque.eixoX = 500;
+        ataque.eixoY = -600;
+    }
+    else if(ataque.tipo == "baixo"){
+        ataque.eixoX = 900;
+        ataque.eixoY = -200;
+    }
+    if(ataque.direcao == "left"){
+        ataque.eixoX = ataque.eixoX * -1;
+        ataque.dx = x - ataque.dw;
+    }
+    return ataque;
+}
+
 //-------------------------------------------------//
+
+let play = document.querySelector("#jogar");
+play.addEventListener("click", () => {
+    play.style.display = "none";
+    carregarJogo();
+});
 
 let lastFrame = 0;
 let altera = false;
@@ -328,10 +505,10 @@ function loop (now){
     //console.log("FPS = "+(1 / deltaTime)+" --- "+ deltaTime)
 
     //if(altera){
-        bg.update();
-        floor.update();
-        p1.update(deltaTime);
-        p2.update(deltaTime);
+    bg.update();
+    floor.update();
+    p1.update(deltaTime);
+    p2.update(deltaTime);
     //}
     altera = !altera
     
@@ -345,4 +522,4 @@ function carregarJogo() {
     lastFrame = tempoInicial;
     loop(tempoInicial);
   });
-} carregarJogo()
+}
